@@ -1,63 +1,103 @@
 //cria uma variável api com o endereço fornecido pelo node
-api = "https://w89zmz-3020.preview.csb.app";
+api = "https://w89zmz-3021.preview.csb.app";
 
-//Faz com que a lista seja coletada antes de mostrar a página
-$(document).ready(() => {
-  users.list();
-});
+function getEu() {
+  $.get("https:/w89zmz-3020.preview.csb.app/users", function (resultado) {
+    console.log(resultado);
+    return "player2";
+  });
+}
+var eu = getEu();
 
-// cria uma variável users para receber a lista
-var users = {
-  //Chama a função list() para criar uma lista
-  //com os resultados vindos do servidor e chamados pelo ajax
-  list() {
-    $.ajax({
-      //Valor da variável api somada com /users fica http://127.0.0.1:3071/users
-      url: api + "/users",
-      //Tipo de requisição HTTP - GET de pegar/buscar dados
-      type: "GET",
-      //quando bem sucedido a resposta do servidor é jogado dentro de data
-      //data terá várias linhas
-      success: (data) => {
-        //tx é uma variável de texto que será usada para concatenar campos
-        //do html junto com o campo TITLE proveniente da resposta do servidor
-        var tx = "";
-        //Cria-se um looping para pegar todas as linhas da variável data
-        //a variável element captura uma linha por vez deêm um console.log(element)
-        //para ver o que ela imprime
-        data.forEach((element) => {
-          tx += '<div class="user">';
-          //no meio do texto fixo, adiciona-se o campo title da linha capturada
-          //pela variável element
-          tx += '<div class="title">' + element.title + "</div>";
-          tx += '<div class="actions">';
-          tx += "</div>";
-          tx += "</div>";
-        });
-        //através do jquery carregamos/substituímos o objeto de ID
-        //main pelos códigos concatenados acima.
-        $("#main").html(tx);
-      },
-    });
+var jogo = false;
+const players = {
+  player1: {
+    vida: 60,
+    pocoes: 3,
+    status: "off",
   },
+  player2: {
+    vida: 60,
+    pocoes: 3,
+    status: "off",
+  },
+  turno: "seu",
 };
 
-//criamos uma função para rodar através do botão
-function teste() {
-  //Similar ao AJAX essa é a função GET do JQUERY
-  //o get irá acessar o servidor no link http://127.0.0.1:3071/users
-  //o resultado será guardado na variável resultado
-  $.get("https:/w89zmz-3020.preview.csb.app/users", function (resultado) {
-    //repete o mesmo processo do AJAX
-    var tx = " ";
-    resultado.forEach((element) => {
-      tx += '<div class="user">';
-      tx += '<div class="title">' + element.title + "</div>";
-      tx += '<div class="actions">';
-      tx += "</div>";
-      tx += "</div>";
-    });
-    //Diferentemente do AJAX este troca o o conteúdo do ID main2
-    $("#main2").html(tx);
-  });
+function dano(min, max) {
+  return Math.random() * (max - min) + min;
+}
+
+function start(vida, pocoes) {
+  if (players.turno == "seu") {
+    document.getElementById(
+      "placar"
+    ).innerHTML = `<li><span>Vida: ${vida}</span> </li> <li><span>Poções: ${pocoes}</span></li><li id="turno" style="color:  rgb(16, 245, 50);">Seu turno</li>`;
+  } else {
+    document.getElementById(
+      "placar"
+    ).innerHTML = `<li><span>Vida: ${vida}</span> </li> <li><span>Poções: ${pocoes}</span></li><li id="turno" style="color:   rgb(224, 0, 0);">Esperando adiversario</li>`;
+  }
+}
+
+function acaos(acao) {
+  if (eu == "player1") {
+    switch (acao) {
+      case "ataque":
+        if (eu == "player1") {
+          if (players.player2.vida >= 0) {
+            let dano = this.dano(0, 15);
+            if (dano > 0) {
+              if (confirm(`Ataque sucedido, ${dano} ao inimigo!`)) {
+                acao = "";
+              }
+            }
+            players.player2.vida -= dano;
+          }
+        }
+        document.getElementById(acao).style.backgroundColor =
+          "rgb(165, 42, 42)";
+        break;
+      case "cura":
+        players.player1.pocoes -= 1;
+        players.player1.vida += 10;
+        document.getElementById(acao).style.backgroundColor =
+          "rgb(42, 165, 52)";
+        break;
+      case "esquiva":
+        document.getElementById(acao).style.backgroundColor =
+          "rgb(165, 99, 42)";
+        break;
+    }
+    start(players.player1.vida, players.player1.pocoes);
+  } else {
+    switch (acao) {
+      case "ataque":
+        if (eu == "player2") {
+          if (players.player1.vida >= 0) {
+            let dano = this.dano(0, 15);
+            if (dano > 0) {
+              if (confirm(`Ataque sucedido, ${dano} ao inimigo!`)) {
+                acao = "";
+              }
+            }
+            players.player1.vida -= dano;
+          }
+        }
+        document.getElementById(acao).style.backgroundColor =
+          "rgb(165, 42, 42)";
+        break;
+      case "cura":
+        players.player2.pocoes -= 1;
+        players.player2.vida += 10;
+        document.getElementById(acao).style.backgroundColor =
+          "rgb(42, 165, 52)";
+        break;
+      case "esquiva":
+        document.getElementById(acao).style.backgroundColor =
+          "rgb(165, 99, 42)";
+        break;
+    }
+    start(players.player2.vida, players.player2.pocoes);
+  }
 }

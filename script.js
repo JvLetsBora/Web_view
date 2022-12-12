@@ -3,8 +3,7 @@ api = "https://w89zmz-3021.preview.csb.app";
 
 function getEu() {
   $.get("https:/w89zmz-3020.preview.csb.app/users", function (resultado) {
-    console.log(resultado);
-    return "player2";
+    return resultado.player;
   });
 }
 var eu = getEu();

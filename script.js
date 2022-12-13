@@ -1,12 +1,14 @@
 //cria uma variável api com o endereço fornecido pelo node
-var api = "https://w89zmz-3021.preview.csb.app";
+var api = "https://w89zmz-3020.preview.csb.app";
+
+var eu = "";
 
 function getEu(theUrl) {
   // Essa Função é chamada no momento do carregamento da tag body na aba visão geral, relacionando a duração com o tamanho do grafico
   let requestLines = new XMLHttpRequest();
   requestLines.onload = function () {
     let dados = JSON.parse(this.responseText); // Essa linha representa a devolutiva da consulta ao banco de dados amarzenada em um array com varios dicionários.
-    return dados;
+    eu = dados;
   };
   /*rota que será exibida*/
 
@@ -14,7 +16,7 @@ function getEu(theUrl) {
   requestLines.send();
 }
 
-var eu = getEu("/players");
+getEu("/players");
 
 var jogo = false;
 const players = {
@@ -35,15 +37,15 @@ function dano(min, max) {
   return Math.random() * (max - min) + min;
 }
 
-function start(vida, pocoes) {
+function start() {
   if (players.turno == "seu") {
     document.getElementById(
       "placar"
-    ).innerHTML = `<li><span>Vida: ${vida}</span> </li> <li><span>Poções: ${pocoes}</span></li><li id="turno" style="color:  rgb(16, 245, 50);">Seu turno</li>`;
+    ).innerHTML = `<li><span>Vida: ${eu[0]["vida"]}</span> </li> <li><span>Poções: ${eu[0]["pocoes"]}</span></li><li id="turno" style="color:  rgb(16, 245, 50);">Seu turno</li>`;
   } else {
     document.getElementById(
       "placar"
-    ).innerHTML = `<li><span>Vida: ${vida}</span> </li> <li><span>Poções: ${pocoes}</span></li><li id="turno" style="color:   rgb(224, 0, 0);">Esperando adiversario</li>`;
+    ).innerHTML = `<li><span>Vida: ${eu[0]["vida"]}</span> </li> <li><span>Poções: ${eu[0]["pocoes"]}</span></li><li id="turno" style="color:   rgb(224, 0, 0);">Esperando adiversario</li>`;
   }
 }
 
@@ -108,3 +110,29 @@ function acaos(acao) {
     start(players.player2.vida, players.player2.pocoes);
   }
 }
+
+function atualizar(vida, pocoes) {
+  url2 = "/atualizar";
+  url3 = "/player1";
+  let params = JSON.stringify({ status: "off" });
+  let clickedProj = new XMLHttpRequest();
+  $.ajax({
+    type: "POST",
+    url: url2,
+    contentType: "application/json; charset=utf-8", //por padrão, temos que avisar que a aplicação é do tipo json e que os caracteres aceitam caracteres especiais
+    dataType: "json", //o conteúdo do dado é json
+    data: JSON.stringify(
+      //transforma os valores em uma string do tipo json
+      {
+        vida: vida, //idFunc, idProject, horasAlocadasProjeto, mes, ano
+        id: 0,
+        status: "on",
+        pocoes: pocoes,
+      }
+    ),
+  });
+  clickedProj.open("GET", url3, true);
+  clickedProj.send(params);
+}
+
+atualizar(2, 5);

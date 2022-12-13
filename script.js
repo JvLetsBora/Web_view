@@ -1,12 +1,20 @@
 //cria uma variável api com o endereço fornecido pelo node
-api = "https://w89zmz-3021.preview.csb.app";
+var api = "https://w89zmz-3021.preview.csb.app";
 
-function getEu() {
-  $.get("https:/w89zmz-3020.preview.csb.app/users", function (resultado) {
-    return resultado.player;
-  });
+function getEu(theUrl) {
+  // Essa Função é chamada no momento do carregamento da tag body na aba visão geral, relacionando a duração com o tamanho do grafico
+  let requestLines = new XMLHttpRequest();
+  requestLines.onload = function () {
+    let dados = JSON.parse(this.responseText); // Essa linha representa a devolutiva da consulta ao banco de dados amarzenada em um array com varios dicionários.
+    return dados;
+  };
+  /*rota que será exibida*/
+
+  requestLines.open("GET", api + theUrl, true);
+  requestLines.send();
 }
-var eu = getEu();
+
+var eu = getEu("/players");
 
 var jogo = false;
 const players = {

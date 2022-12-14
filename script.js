@@ -2,10 +2,10 @@
 var api = "https://w89zmz-3020.preview.csb.app";
 
 var eu = "";
-var vida_ = 0;
-var pocoes_ = 9;
+var vida_ = 60;
+var pocoes_ = 3;
 var player_ = "";
-var jogo = false;
+var jogo = true;
 const players = {
   player1: {
     vida: 60,
@@ -31,18 +31,25 @@ function getEu(theUrl) {
     pocoes_ = dados[0]["pocoes"];
     player_ = dados[0]["status"];
   };
-  /*rota que será exibida*/
 
   requestLines.open("GET", api + theUrl, true);
   requestLines.send();
 }
 
-getEu("/player1");
-if (player_ == "off") {
-  atualizar(players.player1.vida, players.player1.pocoes, "on", "seu");
-} else {
-  atualizar(players.player2.vida, players.player2.pocoes, "on", "dele");
-}
+addEventListener("load", (event) => {
+  atualizar(61, 3, 1);
+  atualizar(61, 3, 2);
+
+  getEu("/player1");
+  if (player_ == "off") {
+    atualizar(players.player1.vida, players.player1.pocoes, "on", "seu");
+    document.getElementById("player").innerHTML = "<b>Você é o player 1</b>";
+  } else {
+    atualizar(players.player2.vida, players.player2.pocoes, "on", "dele");
+    document.getElementById("player").innerHTML = "<b>Você é o player 2</b>";
+    getEu("/player2");
+  }
+});
 
 function dano(min, max) {
   return Math.random() * (max - min) + min;
@@ -58,11 +65,9 @@ function start() {
       "placar"
     ).innerHTML = `<li><span>Vida: ${vida_}</span> </li> <li><span>Poções: ${pocoes_}</span></li><li id="turno" style="color:   rgb(224, 0, 0);">Esperando adiversario</li>`;
   }
-  if (eu == "player1") {
-    atualizar(players.player2.vida, players.player2.pocoes);
-  } else {
-    atualizar(players.player1.vida, players.player1.pocoes);
-  }
+
+  atualizar(players.player1.vida, players.player1.pocoes, 1);
+  atualizar(players.player2.vida, players.player2.pocoes, 2);
 }
 
 function acaos(acao) {
@@ -102,7 +107,6 @@ function acaos(acao) {
   } else {
     switch (acao) {
       case "ataque":
-        console.log(eu);
         if (eu == "player2") {
           if (players.player1.vida >= 0) {
             let dano = this.dano(0, 15);
@@ -135,26 +139,26 @@ function acaos(acao) {
   }
 }
 
-function atualizar(vida, pocoes, status_, vez_) {
+function atualizar(vida, pocoes, a) {
   $.ajax({
     type: "POST",
-    url: api + "/atualizar",
+    url: api + "/atualizar" + a,
     contentType: "application/json; charset=utf-8", //por padrão, temos que avisar que a aplicação é do tipo json e que os caracteres aceitam caracteres especiais
     dataType: "json", //o conteúdo do dado é json
     data: JSON.stringify(
       //transforma os valores em uma string do tipo json
       {
         vida: vida, //idFunc, idProject, horasAlocadasProjeto, mes, ano
-        status: status_,
+        status: "player" + a,
         pocoes: pocoes,
-        vez: vez_,
+        vez: "vez_",
       }
     ),
   });
 
   $.ajax({
     type: "DELETE",
-    url: api + "/deletar",
+    url: api + "/deletar" + a,
     contentType: "application/json; charset=utf-8",
     dataType: "json",
     data: JSON.stringify({

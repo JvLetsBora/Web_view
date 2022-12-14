@@ -42,10 +42,18 @@ addEventListener("load", (event) => {
 
   getEu("/player1");
   if (player_ == "off") {
-    atualizar(players.player1.vida, players.player1.pocoes, "on", "seu");
+    atualizar(
+      parseInt(players.player1.vida),
+      parseInt(players.player1.pocoes),
+      1
+    );
     document.getElementById("player").innerHTML = "<b>Você é o player 1</b>";
   } else {
-    atualizar(players.player2.vida, players.player2.pocoes, "on", "dele");
+    atualizar(
+      parseInt(players.player2.vida),
+      parseInt(players.player2.pocoes),
+      2
+    );
     document.getElementById("player").innerHTML = "<b>Você é o player 2</b>";
     getEu("/player2");
   }
@@ -66,8 +74,16 @@ function start() {
     ).innerHTML = `<li><span>Vida: ${vida_}</span> </li> <li><span>Poções: ${pocoes_}</span></li><li id="turno" style="color:   rgb(224, 0, 0);">Esperando adiversario</li>`;
   }
 
-  atualizar(players.player1.vida, players.player1.pocoes, 1);
-  atualizar(players.player2.vida, players.player2.pocoes, 2);
+  atualizar(
+    parseInt(players.player1.vida),
+    parseInt(players.player1.pocoes),
+    1
+  );
+  atualizar(
+    parseInt(players.player2.vida),
+    parseInt(players.player2.pocoes),
+    2
+  );
 }
 
 function acaos(acao) {

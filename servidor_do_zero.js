@@ -103,7 +103,7 @@ app.delete("/deletar2", urlencodedParser, (req, res) => {
   res.statusCode = 200;
   res.setHeader("Access-Control-Allow-Origin", "*"); // Isso é importante para evitar erro
 
-  sql = `DELETE FROM player2 WHERE vida > ${req.body.vida}`;
+  sql = `DELETE FROM player2 WHERE vida != ${req.body.vida}`;
   var db = new sqlite3.Database(DBPATH); // Abre o banco
   db.run(sql, [], (err) => {
     if (err) {

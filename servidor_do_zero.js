@@ -20,7 +20,7 @@ app.use(express.static("./"));
 app.use(express.json());
 
 // Retorna todos registros (é o R do CRUD - Read)
-app.get("/players", (req, res) => {
+app.get("/player1", (req, res) => {
   res.statusCode = 200;
   res.setHeader("Access-Control-Allow-Origin", "*"); // Isso é importante para evitar o erro de CORS
 
@@ -35,12 +35,28 @@ app.get("/players", (req, res) => {
   db.close(); // Fecha o banco
 });
 
-app.patch("/atualizar", urlencodedParser, (req, res) => {
+app.post("/atualizar", urlencodedParser, (req, res) => {
   res.statusCode = 200;
   res.setHeader("Access-Control-Allow-Origin", "*"); // Isso é importante para evitar o erro
-  sql = `UPDATE player1 SET vida = '${3}', status = '${4}', pocoes = '${
-    req.body.pocoes
-  }'`;
+
+  sql = `INSERT INTO player1 (vida, pocoes, vez) VALUES (${req.body.vida},${req.body.pocoes},${req.body.vez})`;
+  var db = new sqlite3.Database(DBPATH); // Abre o banco
+  console.log(sql);
+  db.run(sql, [], (err) => {
+    if (err) {
+      throw err;
+    } else console.log(sql);
+  });
+  db.close(); // Fecha o banco
+  res.end();
+});
+
+// Exclui um registro
+app.delete("/deletar", urlencodedParser, (req, res) => {
+  res.statusCode = 200;
+  res.setHeader("Access-Control-Allow-Origin", "*"); // Isso é importante para evitar erro
+
+  sql = `DELETE FROM player1 WHERE vida > ${req.body.vida} `;
   var db = new sqlite3.Database(DBPATH); // Abre o banco
   db.run(sql, [], (err) => {
     if (err) {

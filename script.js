@@ -2,22 +2,9 @@
 var api = "https://w89zmz-3020.preview.csb.app";
 
 var eu = "";
-
-function getEu(theUrl) {
-  // Essa Função é chamada no momento do carregamento da tag body na aba visão geral, relacionando a duração com o tamanho do grafico
-  let requestLines = new XMLHttpRequest();
-  requestLines.onload = function () {
-    let dados = JSON.parse(this.responseText); // Essa linha representa a devolutiva da consulta ao banco de dados amarzenada em um array com varios dicionários.
-    eu = dados;
-  };
-  /*rota que será exibida*/
-
-  requestLines.open("GET", api + theUrl, true);
-  requestLines.send();
-}
-
-getEu("/players");
-
+var vida_ = 0;
+var pocoes_ = 9;
+var player_ = "";
 var jogo = false;
 const players = {
   player1: {
@@ -33,6 +20,30 @@ const players = {
   turno: "seu",
 };
 
+function getEu(theUrl) {
+  //p1
+  // Essa Função é chamada no momento do carregamento da tag body na aba visão geral, relacionando a duração com o tamanho do grafico
+  let requestLines = new XMLHttpRequest();
+  requestLines.onload = function () {
+    let dados = JSON.parse(this.responseText); // Essa linha representa a devolutiva da consulta ao banco de dados amarzenada em um array com varios dicionários.
+    eu = dados[0]["vez"];
+    vida_ = dados[0]["vida"];
+    pocoes_ = dados[0]["pocoes"];
+    player_ = dados[0]["status"];
+  };
+  /*rota que será exibida*/
+
+  requestLines.open("GET", api + theUrl, true);
+  requestLines.send();
+}
+
+getEu("/player1");
+if (player_ == "off") {
+  atualizar(players.player1.vida, players.player1.pocoes, "on", "seu");
+} else {
+  atualizar(players.player2.vida, players.player2.pocoes, "on", "dele");
+}
+
 function dano(min, max) {
   return Math.random() * (max - min) + min;
 }
@@ -41,11 +52,16 @@ function start() {
   if (players.turno == "seu") {
     document.getElementById(
       "placar"
-    ).innerHTML = `<li><span>Vida: ${eu[0]["vida"]}</span> </li> <li><span>Poções: ${eu[0]["pocoes"]}</span></li><li id="turno" style="color:  rgb(16, 245, 50);">Seu turno</li>`;
+    ).innerHTML = `<li><span>Vida: ${vida_}</span> </li> <li><span>Poções: ${pocoes_}</span></li><li id="turno" style="color:  rgb(16, 245, 50);">Seu turno</li>`;
   } else {
     document.getElementById(
       "placar"
-    ).innerHTML = `<li><span>Vida: ${eu[0]["vida"]}</span> </li> <li><span>Poções: ${eu[0]["pocoes"]}</span></li><li id="turno" style="color:   rgb(224, 0, 0);">Esperando adiversario</li>`;
+    ).innerHTML = `<li><span>Vida: ${vida_}</span> </li> <li><span>Poções: ${pocoes_}</span></li><li id="turno" style="color:   rgb(224, 0, 0);">Esperando adiversario</li>`;
+  }
+  if (eu == "player1") {
+    atualizar(players.player2.vida, players.player2.pocoes);
+  } else {
+    atualizar(players.player1.vida, players.player1.pocoes);
   }
 }
 
@@ -53,12 +69,16 @@ function acaos(acao) {
   if (eu == "player1") {
     switch (acao) {
       case "ataque":
+        console.log(eu);
         if (eu == "player1") {
           if (players.player2.vida >= 0) {
             let dano = this.dano(0, 15);
             if (dano > 0) {
               if (confirm(`Ataque sucedido, ${dano} ao inimigo!`)) {
                 acao = "";
+                players.turno == "dele";
+                players.player2.vida -= dano;
+                start();
               }
             }
             players.player2.vida -= dano;
@@ -82,12 +102,16 @@ function acaos(acao) {
   } else {
     switch (acao) {
       case "ataque":
+        console.log(eu);
         if (eu == "player2") {
           if (players.player1.vida >= 0) {
             let dano = this.dano(0, 15);
             if (dano > 0) {
               if (confirm(`Ataque sucedido, ${dano} ao inimigo!`)) {
                 acao = "";
+                players.turno == "dele";
+                players.player1.vida -= dano;
+                start();
               }
             }
             players.player1.vida -= dano;
@@ -111,28 +135,30 @@ function acaos(acao) {
   }
 }
 
-function atualizar(vida, pocoes) {
-  url2 = "/atualizar";
-  url3 = "/player1";
-  let params = JSON.stringify({ status: "off" });
-  let clickedProj = new XMLHttpRequest();
+function atualizar(vida, pocoes, status_, vez_) {
   $.ajax({
     type: "POST",
-    url: url2,
+    url: api + "/atualizar",
     contentType: "application/json; charset=utf-8", //por padrão, temos que avisar que a aplicação é do tipo json e que os caracteres aceitam caracteres especiais
     dataType: "json", //o conteúdo do dado é json
     data: JSON.stringify(
       //transforma os valores em uma string do tipo json
       {
         vida: vida, //idFunc, idProject, horasAlocadasProjeto, mes, ano
-        id: 0,
-        status: "on",
+        status: status_,
         pocoes: pocoes,
+        vez: vez_,
       }
     ),
   });
-  clickedProj.open("GET", url3, true);
-  clickedProj.send(params);
-}
 
-atualizar(2, 5);
+  $.ajax({
+    type: "DELETE",
+    url: api + "/deletar",
+    contentType: "application/json; charset=utf-8",
+    dataType: "json",
+    data: JSON.stringify({
+      vida: vida,
+    }),
+  });
+}
